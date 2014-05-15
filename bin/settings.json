@@ -1,0 +1,51 @@
+{
+  "src_folders" : ["../../../git/fly/test/nightwatch/tests"],
+  "output_folder" : "tmp/reports",
+  "custom_commands_path" : "",
+  
+  "selenium" : {
+    "start_process" : false,
+    "server_path" : "",
+    "log_path" : "",
+    "host" : "nw-200-8041vm",
+    "port" : 4444  
+  },
+  
+  "test_settings" : {
+    "ie10" : {
+      "launch_url" : "http://localhost",
+      "selenium_port"  : 4444,
+      "selenium_host"  : "nw-200-8041vm",
+      "silent": true,
+      "firefox_profile": false,
+      "screenshots" : {
+        "enabled" : false,
+        "path" : ""
+      },
+      "desiredCapabilities": {
+        "browserName": "ie10",
+        "javascriptEnabled": true,
+        "acceptSslCerts": true,
+        "nativeEvents":false
+      }
+    },
+    "firefox" : {
+      "launch_url" : "http://localhost",
+      "selenium_port"  : 4444,
+      "selenium_host"  : "nw-200-8041vmb",
+      "silent": true,
+      "firefox_profile": false,
+      "ie_driver": "",
+      "screenshots" : {
+        "enabled" : false,
+        "path" : ""
+      },
+      "desiredCapabilities": {
+        "browserName":"firefox",
+        "javascriptEnabled": true,
+        "acceptSslCerts": true,
+        "nativeEvents":false
+      }
+    }
+  }
+}

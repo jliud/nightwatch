@@ -71,6 +71,10 @@ cli.command('version')
   .alias('v')
   .description('Shows version information.');
 
+cli.command('imagepath').alias('ip').description('Path to save screenshots')
+
+cli.command('databank').alias('db').description('Key Value pair of attributes to utilize')
+
 /**
  * Looks for pattern ${VAR_NAME} in settings
  * @param {Object} target
@@ -162,43 +166,66 @@ function parseTestSettings(argv) {
   }
 
   // picking the environment specific test settings
-  var test_settings = settings.test_settings[argv.e];
+  var test_settings = settings.test_settings;
   test_settings.custom_commands_path = settings.custom_commands_path || '';
   test_settings.custom_assertions_path = settings.custom_assertions_path || '';
 
-  if (test_settings.selenium && typeof (test_settings.selenium) == 'object') {
-    for (var prop in test_settings.selenium) {
-      settings.selenium[prop] = test_settings.selenium[prop];
+  var oldkeys = Object.keys(test_settings);
+
+
+  for(var i = oldkeys.length-1 ; i >= 0 ;i--){
+      if(argv.e != oldkeys[i]){
+           delete test_settings[oldkeys[i]];
+      }
+  }
+  var newkeys = Object.keys(test_settings);
+  for(var i = 0 ; i < newkeys.length;i++){
+    var val = newkeys[i];
+
+    test_settings[val].custom_commands_path = settings.custom_commands_path || '';
+    test_settings[val].custom_assertions_path = settings.custom_assertions_path || '';
+
+
+    if (test_settings.selenium && typeof (test_settings.selenium) == 'object') {
+      for (var prop in test_settings.selenium) {
+        settings.selenium[prop] = test_settings.selenium[prop];
+      }
     }
-  }
-  if (typeof settings.globals == 'string' && settings.globals) {
-    settings.globals_path = settings.globals_path;
-  }
-  if (typeof settings.globals_path == 'string' && settings.globals_path) {
-    var globals = readExternalGlobals(settings.globals_path);
-    if (globals && globals.hasOwnProperty(argv.e)) {
-      test_settings.globals = globals[argv.e];
+    if (typeof settings.globals == 'string' && settings.globals) {
+      settings.globals_path = settings.globals_path;
     }
+    if (typeof settings.globals_path == 'string' && settings.globals_path) {
+      //var globals = readExternalGlobals(settings.globals_path);
+      //if (globals && globals.hasOwnProperty(argv.e)) {
+      //  test_settings[val].globals = globals[argv.e];
+      //}
+    }
+
+    if (test_settings.disable_colors) {
+      Logger.disableColors();
+    }
+
+    if (argv.verbose) {
+      test_settings[val].silent = false;
+    }
+
+    test_settings.output = test_settings.output || typeof test_settings.output === 'undefined';
+
+    if (typeof argv.s == 'string') {
+      test_settings[val].skipgroup = argv.s.split(',');
+    }
+
+    if (argv.f) {
+      test_settings[val].filter = argv.f;
+    }
+      //Append additional CLI arguments into test_settings hash - reconsider this
+      if(argv.ip){
+          test_settings[val]['imagepath'] = argv.ip;  
+      }
+      if(argv.db){
+         test_settings[val]['databank'] = argv.db;  
+      }
   }
-
-  if (test_settings.disable_colors) {
-    Logger.disableColors();
-  }
-
-  if (argv.verbose) {
-    test_settings.silent = false;
-  }
-
-  test_settings.output = test_settings.output || typeof test_settings.output === 'undefined';
-
-  if (typeof argv.s == 'string') {
-    test_settings.skipgroup = argv.s.split(',');
-  }
-
-  if (argv.f) {
-    test_settings.filter = argv.f;
-  }
-
   return test_settings;
 }
 
@@ -253,10 +280,15 @@ try {
       }
     };
 
+ var keys = Object.keys(test_settings);
+
+    for(var i = 0 ; i < keys.length;i++){
+      var val = keys[i];
+
     // running the tests
     if (settings.selenium && settings.selenium.start_process) {
       var selenium = require(__dirname + '/../lib/runner/selenium.js');
-      selenium.startServer(settings, test_settings, function(error, child, error_out, exitcode) {
+        selenium.startServer(settings, test_settings[val], function(error, child, error_out, exitcode) {
         if (error) {
           Logger.error('There was an error while starting the Selenium server:');
           console.log(error_out);
@@ -277,6 +309,7 @@ try {
       }, function(err) {
         errorHandler(err);
       });
+      }
     }
   }
 } catch (ex) {
