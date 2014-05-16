@@ -295,7 +295,7 @@ try {
           process.exit(exitcode);
         }
 
-        runner.run(testsource, test_settings, {
+        runner.run(testsource, test_settings[val], {
           output_folder : output_folder,
           src_folders : settings.src_folders
         }, function(err) {
@@ -304,7 +304,7 @@ try {
         });
       });
     } else {
-      runner.run(testsource, test_settings, {
+      runner.run(testsource, test_settings[val], {
         output_folder : output_folder
       }, function(err) {
         errorHandler(err);
